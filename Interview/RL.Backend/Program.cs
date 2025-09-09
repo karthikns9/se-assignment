@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.OData;
 using RL.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 

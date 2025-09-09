@@ -1,13 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactSelect from "react-select";
+import { upsertAssignments } from "../../../api/api";
 
-const PlanProcedureItem = ({ procedure, users }) => {
+const PlanProcedureItem = ({ procedure, users, planId, initialAssignedUserIds }) => {
+    console.log('users', users);
     const [selectedUsers, setSelectedUsers] = useState(null);
+    const usersLookup = useMemo(() => Object.fromEntries(users.map(u => [u.value, u])), [users]);
+    console.log('userOptionsById', usersLookup);
 
-    const handleAssignUserToProcedure = (e) => {
+    useEffect(() => {
+        if (!initialAssignedUserIds || initialAssignedUserIds.length === 0) {
+            return;
+        }
+        const mapped = initialAssignedUserIds
+            .map(id => usersLookup[id])
+            .filter(Boolean);
+        if ((selectedUsers === null || selectedUsers?.length === 0) && mapped.length > 0) {
+            setSelectedUsers(mapped);
+        }
+        console.log('mapped', mapped);
+    }, [initialAssignedUserIds, usersLookup, selectedUsers]);
+
+    const handleAssignUserToProcedure = async (e) => {
+        console.log('e', e);
         setSelectedUsers(e);
-        // TODO: Remove console.log and add missing logic
-        console.log(e);
+        const ids = Array.isArray(e) ? e.map(x => x.value) : [];
+        try {
+            await upsertAssignments(Number(planId), Number(procedure.procedureId), ids);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (

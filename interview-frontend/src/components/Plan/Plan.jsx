@@ -5,6 +5,7 @@ import {
   getPlanProcedures,
   getProcedures,
   getUsers,
+  getAssignments,
 } from "../../api/api";
 import Layout from '../Layout/Layout';
 import ProcedureItem from "./ProcedureItem/ProcedureItem";
@@ -15,12 +16,13 @@ const Plan = () => {
   const [procedures, setProcedures] = useState([]);
   const [planProcedures, setPlanProcedures] = useState([]);
   const [users, setUsers] = useState([]);
-
+  const [assignmentsByProcedureId, setAssignmentsByProcedureId] = useState({});
   useEffect(() => {
     (async () => {
       var procedures = await getProcedures();
       var planProcedures = await getPlanProcedures(id);
       var users = await getUsers();
+      var assignments = await getAssignments(id);
 
       var userOptions = [];
       users.map((u) => userOptions.push({ label: u.name, value: u.userId }));
@@ -28,6 +30,15 @@ const Plan = () => {
       setUsers(userOptions);
       setProcedures(procedures);
       setPlanProcedures(planProcedures);
+      const grouped = assignments.reduce((acc, a) => {
+        //debugger;
+        const list = acc[a.procedureId] || [];
+        list.push(a.userId);
+        acc[a.procedureId] = list;
+        return acc;
+      }, {});
+      console.log('grouped', grouped);
+      setAssignmentsByProcedureId(grouped);
     })();
   }, [id]);
 
@@ -84,6 +95,8 @@ const Plan = () => {
                           key={p.procedure.procedureId}
                           procedure={p.procedure}
                           users={users}
+                          initialAssignedUserIds={assignmentsByProcedureId[p.procedure.procedureId] || []}
+                          planId={id}
                         />
                       ))}
                     </div>

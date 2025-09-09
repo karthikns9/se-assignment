@@ -65,3 +65,30 @@ export const getUsers = async () => {
 
     return await response.json();
 };
+
+export const getAssignments = async (planId) => {
+    const url = `${api_url}/PlanProcedure/Assignments?planId=${planId}`;
+    const response = await fetch(url, {
+        method: "GET",
+    });
+
+    if (!response.ok) throw new Error("Failed to get assignments");
+
+    return await response.json();
+};
+
+export const upsertAssignments = async (planId, procedureId, userIds) => {
+    const url = `${api_url}/PlanProcedure/Assignments`;
+    const payload = { planId, procedureId, userIds };
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) throw new Error("Failed to save assignments");
+    return true;
+};
